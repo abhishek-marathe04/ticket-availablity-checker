@@ -17,7 +17,7 @@ from bs4 import BeautifulSoup
 
 # The BMS event URL for MI vs RCB at Wankhede (April 12, 2026)
 # This is the direct search/event URL — update if BMS changes it
-BMS_EVENT_URL = "https://in.bookmyshow.com/sports/mumbai-indians-vs-royal-challengers-bengaluru/ET00408726"
+BMS_EVENT_URL = "https://in.bookmyshow.com/sports/mumbai-indians-vs-royal-challengers-bengaluru/ET00491196?data=groupPage"
 
 # Fallback: BMS search page for IPL in Mumbai
 BMS_SEARCH_URL = "https://in.bookmyshow.com/explore/sports/mumbai"
@@ -32,6 +32,17 @@ AVAILABILITY_SIGNALS = [
     "bookButton",
     "Select Seats",
     "select-seats",
+    "Fast Filling",
+    "fast filling",
+    "Filling Fast",
+    "filling fast",
+    "Going Fast",
+    "going fast",
+    "Few Tickets",
+    "few tickets",
+    "Limited Tickets",
+    "limited tickets",
+    "Available",
 ]
 
 # Strings that mean tickets are NOT yet available (sold out / coming soon)
@@ -175,7 +186,7 @@ def main():
     print(f"  BMS Ticket Checker  |  {datetime.now().strftime('%d %b %Y %H:%M:%S')}")
     print(f"{'='*55}")
 
-    urls_to_check = [BMS_EVENT_URL, BMS_SEARCH_URL]
+    urls_to_check = [BMS_EVENT_URL]
 
     for url in urls_to_check:
         print(f"\nChecking: {url}")
