@@ -1,0 +1,55 @@
+name: BMS MI vs RCB Ticket Checker
+
+on:
+  # ── Run every 10 minutes ──────────────────────────────────────────────────
+  schedule:
+    - cron: "*/10 * * * *"   # every 10 min  (GitHub min is 5 min)
+
+  # ── Also allow manual trigger from the Actions tab ────────────────────────
+  workflow_dispatch:
+    inputs:
+      send_heartbeat:
+        description: "Send heartbeat email even if no tickets?"
+        required: false
+        default: "false"
+
+jobs:
+  check-tickets:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      # 1. Checkout your repo
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      # 2. Set up Python
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      # 3. Install dependencies
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # 4. Run the checker (secrets injected as env vars)
+      - name: Run ticket checker
+        env:
+          GMAIL_USER: ${{ secrets.GMAIL_USER }}
+          GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
+          ALERT_TO_EMAIL: ${{ secrets.ALERT_TO_EMAIL }}
+          SEND_HEARTBEAT: ${{ github.event.inputs.send_heartbeat || 'false' }}
+        run: python checker.py
+
+      # 5. Show a summary in the Actions UI if tickets were found
+      - name: Check if tickets were found
+        if: always()
+        run: |
+          if [ -f TICKET_FOUND.txt ]; then
+            echo "## 🎉 TICKETS FOUND!" >> $GITHUB_STEP_SUMMARY
+            cat TICKET_FOUND.txt >> $GITHUB_STEP_SUMMARY
+          else
+            echo "## 😴 No tickets yet — checked at $(date '+%d %b %Y %H:%M UTC')" >> $GITHUB_STEP_SUMMARY
+          fi
