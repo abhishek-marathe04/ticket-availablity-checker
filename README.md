@@ -1,13 +1,29 @@
-# 🏏 BookMyShow MI vs RCB Ticket Checker
+# BMS MI vs RCB Ticket Checker
 
-Automatically checks BookMyShow every 10 minutes for **MI vs RCB (April 12, 2026)**
-ticket availability and emails you the moment they go live.
+Automatically checks BookMyShow every 10 minutes for **MI vs RCB (April 12, 2026)** ticket availability and sends a Discord notification the moment they go live.
 
 Runs entirely free on **GitHub Actions** — no server, no laptop needed.
 
 ---
 
-## 🚀 Setup (5 minutes)
+## Notifications
+
+**Every run (heartbeat):** Lets you know the bot is alive and what status it detected.
+```
+🤖 BMS Checker: Still watching
+Status: No tickets yet — Unavailability signal found: 'Sold Out'
+Checked at: 30 Mar 2026, 10:00 AM IST
+```
+
+**When tickets open:**
+```
+🚨 MI vs RCB Tickets AVAILABLE on BookMyShow!
+👉 Book Now on BookMyShow  ← direct link
+```
+
+---
+
+## Setup (5 minutes)
 
 ### Step 1: Create the GitHub repo
 
@@ -16,7 +32,6 @@ Runs entirely free on **GitHub Actions** — no server, no laptop needed.
 3. Push this folder's contents to it:
 
 ```bash
-cd bms-ticket-checker
 git init
 git add .
 git commit -m "Initial commit"
@@ -26,28 +41,21 @@ git push -u origin main
 
 ---
 
-### Step 2: Get a Gmail App Password
+### Step 2: Create a Discord Webhook
 
-Gmail requires an **App Password** (not your real password) for SMTP:
-
-1. Go to [myaccount.google.com/security](https://myaccount.google.com/security)
-2. Enable **2-Step Verification** (required)
-3. Search for **"App passwords"** → create one → name it "BMS Checker"
-4. Copy the 16-character password (e.g. `abcd efgh ijkl mnop`)
+1. Open a Discord server you own (or create a personal one)
+2. Click the gear icon on any text channel → **Integrations** → **Webhooks** → **New Webhook**
+3. Name it `BMS Checker`, then click **Copy Webhook URL**
 
 ---
 
-### Step 3: Add GitHub Secrets
+### Step 3: Add GitHub Secret
 
 In your repo → **Settings → Secrets and variables → Actions → New repository secret**
 
-Add these 3 secrets:
-
-| Secret Name         | Value                                 |
-|---------------------|---------------------------------------|
-| `GMAIL_USER`        | `your.email@gmail.com`                |
-| `GMAIL_APP_PASSWORD`| The 16-char app password from Step 2  |
-| `ALERT_TO_EMAIL`    | Email to send alerts to (can be same) |
+| Secret Name            | Value                        |
+|------------------------|------------------------------|
+| `DISCORD_WEBHOOK_URL`  | The webhook URL from Step 2  |
 
 ---
 
@@ -55,48 +63,41 @@ Add these 3 secrets:
 
 1. Go to your repo → **Actions** tab
 2. Click **"I understand my workflows, go ahead and enable them"**
-3. The workflow will now run automatically every 10 minutes ✅
+3. The workflow will now run automatically every 10 minutes
 
 ---
 
-## 🧪 Test It Manually
+## Test It Manually
 
 Go to **Actions → BMS MI vs RCB Ticket Checker → Run workflow**
 
-Set `send_heartbeat = true` to receive a test email and confirm everything works.
+You'll receive a heartbeat Discord message immediately confirming the bot is working.
 
 ---
 
-## 📬 What You'll Receive
+## Customisation
 
-**When tickets are found:**
-```
-🚨 MI vs RCB Tickets AVAILABLE on BookMyShow!
-[Book Now button linking directly to BMS]
-```
-
-**Heartbeat (manual run only):**
-```
-🤖 BMS Checker: Still watching (no tickets yet)
-```
+| What to change     | Where                              |
+|--------------------|------------------------------------|
+| Check frequency    | `cron` line in `ticket-checker.yml`|
+| BMS event URL      | `BMS_EVENT_URL` in `checker.py`    |
+| Detection keywords | `AVAILABILITY_SIGNALS` list        |
 
 ---
 
-## ⚙️ Customisation
+## How Detection Works
 
-| What to change              | Where                          |
-|-----------------------------|--------------------------------|
-| Check frequency             | `cron` line in the workflow    |
-| BMS event URL               | `BMS_EVENT_URL` in checker.py  |
-| Detection keywords          | `AVAILABILITY_SIGNALS` list    |
-| Enable daily heartbeat email| Set `SEND_HEARTBEAT=true` in workflow env |
+The checker scans the raw HTML of the BMS event page for signals:
+
+**Tickets available** (triggers alert): `Book Now`, `Fast Filling`, `Filling Fast`, `Going Fast`, `Few Tickets`, `Select Seats`, etc.
+
+**Tickets not available** (triggers heartbeat only): `Sold Out`, `Coming Soon`, `Notify Me`, `Registration Closed`
+
+If BMS changes their page structure, update `AVAILABILITY_SIGNALS` in `checker.py`.
 
 ---
 
-## ⚠️ Important Notes
+## Notes
 
-- **BMS is JS-heavy** — the checker scans raw HTML signals. If BMS changes their
-  page structure, update `AVAILABILITY_SIGNALS` in `checker.py`.
-- GitHub Actions free tier allows **2,000 minutes/month** — running every 10 min
-  uses ~2 min/day × 30 = ~60 min/month. Well within limits.
+- GitHub Actions free tier allows **2,000 minutes/month** — running every 10 min uses ~60 min/month, well within limits.
 - This is for personal use only. Don't abuse BMS servers with very frequent polling.
