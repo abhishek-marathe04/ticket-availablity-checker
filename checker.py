@@ -7,8 +7,11 @@ import os
 import sys
 from datetime import datetime
 
+import cloudscraper
 import requests
 from bs4 import BeautifulSoup
+
+_scraper = cloudscraper.create_scraper(browser={"browser": "chrome", "platform": "darwin", "mobile": False})
 
 # ── CONFIG ────────────────────────────────────────────────────────────────────
 
@@ -68,7 +71,7 @@ HEADERS = {
 def fetch_page(url: str) -> str | None:
     """Fetch a URL and return HTML, or None on failure."""
     try:
-        resp = requests.get(url, headers=HEADERS, timeout=15)
+        resp = _scraper.get(url, headers=HEADERS, timeout=15)
         print(f"  → GET {url}  [status {resp.status_code}]")
         resp.raise_for_status()
         return resp.text
