@@ -101,7 +101,7 @@ def check_availability(html: str) -> tuple[bool, str]:
     return False, "No booking signal detected on page"
 
 
-def send_discord(content: str, embeds: list | None = None):
+def send_discord(content: str = "", embeds: list | None = None):
     """Post a message to the Discord webhook."""
     payload = {"content": content}
     if embeds:
